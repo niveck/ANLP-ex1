@@ -1,0 +1,30 @@
+>>> from prepare import prepare
+>>> prepare()
+>>> from datasets import load_dataset
+>>> snli = load_dataset('snli')
+Found cached dataset snli (/cs/snapless/gabis/uriber/playground/hf_cache/datasets/snli/plain_text/1.0.0/1f60b67533b65ae0275561ff7828aad5ee4282d0e6f844fd148d05d3c6ea251b)
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00,  4.49it/s]
+>>> snli.keys()
+dict_keys(['test', 'train', 'validation'])
+>>> train_set = snli['train']
+>>> len(train_set)
+550152
+>>> train_set = train_set.filter(lambda x:x['label'] != -1)
+Loading cached processed dataset at /cs/snapless/gabis/uriber/playground/hf_cache/datasets/snli/plain_text/1.0.0/1f60b67533b65ae0275561ff7828aad5ee4282d0e6f844fd148d05d3c6ea251b/cache-d1d869e123f4a71a.arrow
+>>> len(train_set)
+549367
+>>> train_set[0]
+{'premise': 'A person on a horse jumps over a broken down airplane.', 'hypothesis': 'A person is training his horse for a competition.', 'label': 1}
+>>> train_set[1]
+{'premise': 'A person on a horse jumps over a broken down airplane.', 'hypothesis': 'A person is at a diner, ordering an omelette.', 'label': 2}
+>>> train_set[2]
+{'premise': 'A person on a horse jumps over a broken down airplane.', 'hypothesis': 'A person is outdoors, on a horse.', 'label': 0}
+>>> len(train_set.filter(lambda x:x['label'] == 0))
+Loading cached processed dataset at /cs/snapless/gabis/uriber/playground/hf_cache/datasets/snli/plain_text/1.0.0/1f60b67533b65ae0275561ff7828aad5ee4282d0e6f844fd148d05d3c6ea251b/cache-c5291bd36486c831.arrow
+183416
+>>> len(train_set.filter(lambda x:x['label'] == 1))
+Loading cached processed dataset at /cs/snapless/gabis/uriber/playground/hf_cache/datasets/snli/plain_text/1.0.0/1f60b67533b65ae0275561ff7828aad5ee4282d0e6f844fd148d05d3c6ea251b/cache-7ac293a345157ede.arrow
+182764
+>>> len(train_set.filter(lambda x:x['label'] == 2))
+Loading cached processed dataset at /cs/snapless/gabis/uriber/playground/hf_cache/datasets/snli/plain_text/1.0.0/1f60b67533b65ae0275561ff7828aad5ee4282d0e6f844fd148d05d3c6ea251b/cache-6f22a1e0724bedb2.arrow
+183187

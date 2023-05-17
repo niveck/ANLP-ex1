@@ -1,0 +1,2 @@
+recommanded table to use for the dynamic padding:
+https://huggingface.co/docs/transformers/pad_truncation

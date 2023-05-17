@@ -1,0 +1,10 @@
+>>> from prepare import prepare
+>>> prepare()
+>>> from sentence_transformers import CrossEncoder
+>>> model = CrossEncoder('cross-encoder/nli-roberta-base')
+>>> sentences = [('Yoko Ono unveiled a bronze statue for her late husband, John Lennon', 'Yoko Ono is John Lennon\'s widow'), ('Yoko Ono unveiled a bronze statue for her late husband, John Lennon', 'John Lennon is Yoko Ono\'s widow'), ('Yoko Ono unveiled a bronze statue for her late husband, John Lennon', 'John Lennon and Yoko Ono married in 1969')]
+>>> scores = model.predict(sentences)
+>>> label_mapping = ['contradiction', 'entailment', 'neutral']
+>>> labels = [label_mapping[score_max] for score_max in scores.argmax(axis=1)]
+>>> labels
+['entailment', 'entailment', 'neutral']
