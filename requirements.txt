@@ -1,0 +1,7 @@
+evaluate~=0.4.0
+datasets~=2.12.0
+transformers~=4.29.2
+torch
+scikit-learn
+numpy~=1.24.3
+wandb
