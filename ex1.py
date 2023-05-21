@@ -66,6 +66,7 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
             finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
                                               number_of_training_samples,
                                               number_of_validation_samples, compute_metrics)
+        print(f"#######   *** tokenizer: {tokenizer}")  # todo remove
         res += f"{model_name},{mean_accuracy} +- {accuracy_std}\n"
         if mean_accuracy > best_mean_accuracy:
             best_mean_accuracy = mean_accuracy
@@ -146,7 +147,9 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
     :param predictions_output_path:
     :return: prediction time in seconds
     """
-    # Trainer object is calling model.eval() implicitly when calling predict()
+    # Trainer object is calling model.eval() implicitly when calling predict() # todo ?
+    trainer.model.eval()
+    print(f"#######   *** tokenizer: {tokenizer}")  # todo remove
     # todo if have problems maybe use this line:
     # dataset.set_format("pt", output_all_columns=True)
     preprocess = lambda examples: tokenizer(examples["sentence"], truncation=True, padding=False)  # todo validate
@@ -187,6 +190,7 @@ def main():
         dataset, MODEL_NAMES, number_of_seeds, number_of_training_samples,
         number_of_validation_samples)
     print(f"#######   passed all train")  # todo remove
+    print(f"#######   *** tokenizer: {tokenizer}")  # todo remove
 
     prediction_time = predict(dataset, most_accurate_model, tokenizer, number_of_prediction_samples)
     print(f"#######   passed all predict")  # todo remove
