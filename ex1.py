@@ -101,15 +101,18 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         eval_dataset = preprocessed_data["validation"]
         if number_of_validation_samples > 0:
             eval_dataset = eval_dataset.select(range(number_of_validation_samples))
-        trainer = Trainer(model=model, train_dataset=train_dataset,
         # trainer = Trainer(model=model, args=args, train_dataset=train_dataset,  # todo maybe remove
+        trainer = Trainer(model=model, train_dataset=train_dataset,
                           eval_dataset=eval_dataset, compute_metrics=compute_metrics,
                           tokenizer=tokenizer)
         # todo maybe use DataLoader and/or DataLoader
         print(f"#######   passed creating a trainer")  # todo remove
         train_result = trainer.train()
-        print(f"#######   train_result.metrics: {train_result.metrics}")  # todo remove
-        accuracy = train_result.metrics["accuracy"]  # todo validate key
+        print(f"#######   passed training")  # todo remove
+        eval_results = trainer.evaluate()
+        print(f"#######   passed evaluate")  # todo remove
+        print(f"#######   eval_results.metrics: {eval_results.metrics}")  # todo remove
+        accuracy = eval_results.metrics["accuracy"]  # todo validate key
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         print(f"#######   passed wandb.log")  # todo remove
         trainers.append(trainer)
