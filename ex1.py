@@ -26,6 +26,18 @@ PREDICTIONS_OUTPUT_PATH = "predictions.txt"
 #     return "training_dir_" + model_name.replace("/", "-") + f"_{seed}"
 
 
+def create_metric(metric):
+    def compute_metrics(p: EvalPrediction):
+        # inspired from examples/pytorch/text-classification/run_glue.py on GitHub
+        predictions = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+        predictions = np.argmax(predictions, axis=1)
+        result = metric.compute(predictions=predictions, references=p.label_ids)
+        if len(result) > 1:
+            result["combined_score"] = np.mean(list(result.values())).item()
+        return result
+    return compute_metrics
+
+
 def train(dataset, model_names, number_of_seeds, number_of_training_samples,
           number_of_validation_samples):
     """
@@ -42,7 +54,7 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
              respective tokenizer and the string documenting the results.
     """
     metric = evaluate.load("accuracy")
-    compute_metrics = lambda p: metric.compute(predictions=p.predictions, references=p.label_ids)
+    compute_metrics = create_metric(metric)
     res = ""
     best_mean_accuracy = 0  # todo validate that this is the worse possible
     most_accurate_model = None
