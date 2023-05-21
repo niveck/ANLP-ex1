@@ -123,7 +123,6 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         print(f"#######   passed training")  # todo remove
         eval_results = trainer.evaluate()
         print(f"#######   passed evaluate")  # todo remove
-        print(f"#######   eval_results.keys: {eval_results.keys()}")  # todo remove
         accuracy = eval_results["eval_accuracy"]  # todo validate key
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         print(f"#######   passed wandb.log")  # todo remove
@@ -147,7 +146,7 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
     :param predictions_output_path:
     :return: prediction time in seconds
     """
-    trainer.eval()
+    # Trainer object is calling model.eval() implicitly when calling predict()
     # todo if have problems maybe use this line:
     # dataset.set_format("pt", output_all_columns=True)
     preprocess = lambda examples: tokenizer(examples["sentence"], truncation=True, padding=False)  # todo validate
