@@ -108,6 +108,7 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         # todo maybe use DataLoader and/or DataLoader
         print(f"#######   passed creating a trainer")  # todo remove
         train_result = trainer.train()
+        print(f"#######   train_result.metrics: {train_result.metrics}")  # todo remove
         accuracy = train_result.metrics["accuracy"]  # todo validate key
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         print(f"#######   passed wandb.log")  # todo remove
