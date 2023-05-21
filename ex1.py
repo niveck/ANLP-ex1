@@ -123,8 +123,8 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         print(f"#######   passed training")  # todo remove
         eval_results = trainer.evaluate()
         print(f"#######   passed evaluate")  # todo remove
-        print(f"#######   eval_results.metrics: {eval_results.metrics}")  # todo remove
-        accuracy = eval_results.metrics["accuracy"]  # todo validate key
+        print(f"#######   eval_results.keys: {eval_results.keys()}")  # todo remove
+        accuracy = eval_results["eval_accuracy"]  # todo validate key
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         print(f"#######   passed wandb.log")  # todo remove
         trainers.append(trainer)
