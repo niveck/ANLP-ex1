@@ -68,7 +68,7 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
                                               number_of_validation_samples, compute_metrics)
         res += f"{model_name},{mean_accuracy} +- {accuracy_std}\n"
         print(f"####### mean_accuracy: [{mean_accuracy}], best_mean_accuracy: [{best_mean_accuracy}]")  # todo remove
-        if mean_accuracy > best_mean_accuracy:
+        if mean_accuracy >= best_mean_accuracy:  # >= is used in edge case of all accuracies are 0
             best_mean_accuracy = mean_accuracy
             most_accurate_model = model_best_trainer
             most_accurate_model_tokenizer = tokenizer
@@ -125,6 +125,7 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         eval_results = trainer.evaluate()
         print(f"#######   passed evaluate")  # todo remove
         accuracy = eval_results["eval_accuracy"]  # todo validate key
+        print(f"#######   accuracy")  # todo remove
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         print(f"#######   passed wandb.log")  # todo remove
         trainers.append(trainer)
