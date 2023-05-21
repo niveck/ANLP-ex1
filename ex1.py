@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from time import time
 from prepare import prepare
 import evaluate
 from datasets import load_dataset
@@ -136,21 +137,21 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
     :param predictions_output_path:
     :return: prediction time in seconds
     """
-    # Trainer object is calling model.eval() implicitly when calling predict() # todo ?
     trainer.model.eval()
-    preprocess = lambda examples: tokenizer(examples["sentence"], truncation=True, padding=False)  # todo validate
-    preprocessed_data = dataset.map(preprocess, batched=True,  batch_size=1)
-    preprocessed_data.set_format("pt", output_all_columns=True)
-    test_dataset = preprocessed_data["test"]
+    test_dataset = dataset["test"]
     if number_of_prediction_samples > 0:
         test_dataset = test_dataset.select(range(number_of_prediction_samples))
-    predictions = trainer.predict(test_dataset=test_dataset)
     output = ""
-    for sentence, prediction in zip(test_dataset["sentence"], predictions.predictions):
+    prediction_time = 0
+    for sentence in test_dataset["sentence"]:
+        tokenized_sentence = tokenizer(sentence, truncation=True, return_tensors='pt')
+        before_predict_time = time()
+        prediction = trainer.model(**tokenized_sentence)
+        prediction_time += (time() - before_predict_time)
         output += f"{sentence}###{prediction}\n"
     with open(predictions_output_path, "w") as f:
         f.write(output)
-    return predictions.metrics["predict_runtime"]
+    return prediction_time
 
 
 def main():
