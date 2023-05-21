@@ -138,11 +138,9 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
     """
     # Trainer object is calling model.eval() implicitly when calling predict() # todo ?
     trainer.model.eval()
-    # todo if have problems maybe use this line:
-    # dataset.set_format("pt", output_all_columns=True)
     preprocess = lambda examples: tokenizer(examples["sentence"], truncation=True, padding=False)  # todo validate
-    preprocessed_data = dataset.map(preprocess, batched=True,  batch_size=1).set_format(
-        "pt", output_all_columns=True)
+    preprocessed_data = dataset.map(preprocess, batched=True,  batch_size=1).
+    preprocessed_data.set_format("pt", output_all_columns=True)
     test_dataset = preprocessed_data["test"]
     if number_of_prediction_samples > 0:
         test_dataset = test_dataset.select(range(number_of_prediction_samples))
