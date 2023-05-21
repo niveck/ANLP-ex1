@@ -49,7 +49,7 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
     most_accurate_model_tokenizer = None
     accumulated_training_time = 0  # todo validate right format for seconds
     for model_name in model_names:
-        print(f"started finetune for {model_name}")  # todo remove
+        print(f"#######   started finetune for {model_name}")  # todo remove
         mean_accuracy, accuracy_std, model_best_trainer, tokenizer, training_time = \
             finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
                                               number_of_training_samples,
@@ -60,9 +60,9 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
             most_accurate_model = model_best_trainer
             most_accurate_model_tokenizer = tokenizer
         accumulated_training_time += training_time
-    print(f"finished finetune of all models")  # todo remove
+    print(f"#######   finished finetune of all models")  # todo remove
     wandb.finish()
-    print(f"passed wandb.finish")  # todo remove
+    print(f"#######   passed wandb.finish")  # todo remove
     res += "----\n"
     return accumulated_training_time, most_accurate_model, most_accurate_model_tokenizer, res
 
@@ -85,13 +85,13 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
     config = AutoConfig.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, config=config)
-    print(f"passed config, tokenizer, model from pretrained")  # todo remove
+    print(f"#######   passed config, tokenizer, model from pretrained")  # todo remove
     preprocess = lambda examples: tokenizer(examples["sentence"], truncation=True, padding=True)
     trainers = []
     accuracies = []
     training_time = 0
     for seed in range(number_of_seeds):
-        print(f"started finetune for seed {seed}")  # todo remove
+        print(f"#######   started finetune for seed {seed}")  # todo remove
         # args = TrainingArguments(get_model_training_dir(model_name, seed))  # todo maybe remove
         set_seed(seed)
         preprocessed_data = dataset.map(preprocess, batched=True)  # todo batched?
@@ -106,15 +106,15 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
                           eval_dataset=eval_dataset, compute_metrics=compute_metrics,
                           tokenizer=tokenizer)
         # todo maybe use DataLoader and/or DataLoader
-        print(f"passed creating a trainer")  # todo remove
+        print(f"#######   passed creating a trainer")  # todo remove
         train_result = trainer.train()
         accuracy = train_result.metrics["accuracy"]  # todo validate key
         wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
-        print(f"passed wandb.log")  # todo remove
+        print(f"#######   passed wandb.log")  # todo remove
         trainers.append(trainer)
         accuracies.append(accuracy)
         training_time += train_result.metrics["train_runtime"]  # todo validate it's in seconds
-    print(f"passed all seeds for model {model_name}")  # todo remove
+    print(f"#######   passed all seeds for model {model_name}")  # todo remove
     return np.mean(accuracies), np.std(accuracies), trainers[np.argmax(accuracies)], tokenizer, \
         training_time
 
@@ -140,13 +140,13 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
     if number_of_prediction_samples > 0:
         test_dataset = test_dataset.select(range(number_of_prediction_samples))
     predictions = trainer.predict(test_dataset=test_dataset)
-    print(f"passed trainer.predict")  # todo remove
+    print(f"#######   passed trainer.predict")  # todo remove
     output = ""
     for sentence, prediction in zip(test_dataset["sentence"], predictions.predictions):
         output += f"{sentence}###{prediction}\n"
     with open(predictions_output_path, "w") as f:
         f.write(output)
-    print(f"passed writing output")  # todo remove
+    print(f"#######   passed writing output")  # todo remove
     return predictions.metrics["predict_runtime"]
 
 
@@ -159,27 +159,27 @@ def main():
     number_of_prediction_samples = int(sys.argv[4])
 
     prepare()
-    print("passed prepare script")  # todo remove
+    print(f"#######   passed prepare script")  # todo remove
 
     dataset = load_dataset(DATASET)
-    print("passed loading dataset script")  # todo remove
+    print(f"#######   passed loading dataset script")  # todo remove
 
     wandb.login()
     wandb.init(project=PROJECT_NAME, name=LOG_NAME)
-    print("passed wandb.init")  # todo remove
+    print(f"#######   passed wandb.init")  # todo remove
 
     accumulated_training_time, most_accurate_model, tokenizer, res = train(
         dataset, MODEL_NAMES, number_of_seeds, number_of_training_samples,
         number_of_validation_samples)
-    print(f"passed all train")  # todo remove
+    print(f"#######   passed all train")  # todo remove
 
     prediction_time = predict(dataset, most_accurate_model, tokenizer, number_of_prediction_samples)
-    print(f"passed all predict")  # todo remove
+    print(f"#######   passed all predict")  # todo remove
 
     res += f"train time,{accumulated_training_time}\npredict time,{prediction_time}\n"
     with open(RESULTS_PATH, "w") as f:
         f.write(res)
-    print(f"passed writing of res")  # todo remove
+    print(f"#######   passed writing of res")  # todo remove
 
 
 if __name__ == "__main__":
