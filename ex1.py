@@ -66,8 +66,8 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
             finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
                                               number_of_training_samples,
                                               number_of_validation_samples, compute_metrics)
-        print(f"#######   *** tokenizer: {tokenizer}")  # todo remove
         res += f"{model_name},{mean_accuracy} +- {accuracy_std}\n"
+        print(f"####### mean_accuracy: [{mean_accuracy}], best_mean_accuracy: [{best_mean_accuracy}]")  # todo remove
         if mean_accuracy > best_mean_accuracy:
             best_mean_accuracy = mean_accuracy
             most_accurate_model = model_best_trainer
