@@ -118,7 +118,8 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         train_result = trainer.train()
         eval_results = trainer.evaluate()
         accuracy = eval_results["eval_accuracy"]  # todo validate key
-        wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
+        if seed == 0:
+            wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
         trainers.append(trainer)
         accuracies.append(accuracy)
         training_time += train_result.metrics["train_runtime"]  # todo validate it's in seconds
