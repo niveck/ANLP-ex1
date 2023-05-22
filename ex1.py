@@ -106,7 +106,8 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         train_result = trainer.train()
         eval_results = trainer.evaluate()
         if seed == 0:
-            for step, loss in enumerate(trainer.state.log_history["loss"]):
+            loss_history = [log["loss"] for log in trainer.state.log_history]
+            for step, loss in enumerate(loss_history):
                 wandb.log({"train_loss": loss}, step=step)
             wandb.finish()
         accuracy = eval_results["eval_accuracy"]
