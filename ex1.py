@@ -107,6 +107,9 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         eval_results = trainer.evaluate()
         if seed == 0:
             loss_history = [log for log in trainer.state.log_history]
+            print(loss_history[0])
+            print(type(loss_history[0]))
+            print(loss_history[0].keys())
             for step, loss in enumerate(loss_history):
                 wandb.log({"train_loss": loss}, step=step)
             wandb.finish()
