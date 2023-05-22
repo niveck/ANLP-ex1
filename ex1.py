@@ -5,27 +5,17 @@ from prepare import prepare
 import evaluate
 from datasets import load_dataset
 from transformers import (
-    set_seed, AutoModelForSequenceClassification, TrainingArguments, Trainer, EvalPrediction,
-    AutoTokenizer, AutoConfig)
+    set_seed, AutoModelForSequenceClassification, Trainer,
+    EvalPrediction, AutoTokenizer, AutoConfig)
 import wandb
 import torch
 
 
 PROJECT_NAME = "ANLP-ex1"
-LOG_NAME = "Accuracy Comparison"
 DATASET = "sst2"
 MODEL_NAMES = ["bert-base-uncased", "roberta-base", "google/electra-base-generator"]
 RESULTS_PATH = "res.txt"
 PREDICTIONS_OUTPUT_PATH = "predictions.txt"
-
-
-# def get_model_training_dir(model_name, seed): # todo maybe remove
-#     """
-#     :param model_name:
-#     :param seed:
-#     :return: the training dir of the saved model with specified name and seed
-#     """
-#     return "training_dir_" + model_name.replace("/", "-") + f"_{seed}"
 
 
 def create_metric(metric):
@@ -58,10 +48,10 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
     metric = evaluate.load("accuracy")
     compute_metrics = create_metric(metric)
     res = ""
-    best_mean_accuracy = 0  # todo validate that this is the worse possible
+    best_mean_accuracy = 0
     most_accurate_model = None
     most_accurate_model_tokenizer = None
-    accumulated_training_time = 0  # todo validate right format for seconds
+    accumulated_training_time = 0
     for model_name in model_names:
         mean_accuracy, accuracy_std, model_best_trainer, tokenizer, training_time = \
             finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
@@ -73,7 +63,6 @@ def train(dataset, model_names, number_of_seeds, number_of_training_samples,
             most_accurate_model = model_best_trainer
             most_accurate_model_tokenizer = tokenizer
         accumulated_training_time += training_time
-    wandb.finish()
     res += "----\n"
     return accumulated_training_time, most_accurate_model, most_accurate_model_tokenizer, res
 
@@ -101,28 +90,29 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
     accuracies = []
     training_time = 0
     for seed in range(number_of_seeds):
-        # args = TrainingArguments(get_model_training_dir(model_name, seed))  # todo maybe remove
         set_seed(seed)
-        preprocessed_data = dataset.map(preprocess, batched=True)  # todo batched?
+        if seed == 0:
+            wandb.init(project=PROJECT_NAME, name=model_name.replace("/", "-"))
+        preprocessed_data = dataset.map(preprocess, batched=True)
         train_dataset = preprocessed_data["train"]
         if number_of_training_samples > 0:
             train_dataset = train_dataset.select(range(number_of_training_samples))
         eval_dataset = preprocessed_data["validation"]
         if number_of_validation_samples > 0:
             eval_dataset = eval_dataset.select(range(number_of_validation_samples))
-        # trainer = Trainer(model=model, args=args, train_dataset=train_dataset,  # todo maybe remove
         trainer = Trainer(model=model, train_dataset=train_dataset,
                           eval_dataset=eval_dataset, compute_metrics=compute_metrics,
                           tokenizer=tokenizer)
-        # todo maybe use DataLoader and/or DataLoader
         train_result = trainer.train()
         eval_results = trainer.evaluate()
-        accuracy = eval_results["eval_accuracy"]  # todo validate key
         if seed == 0:
-            wandb.log({"Model": model_name, "Seed": seed, "Accuracy": accuracy})
+            for step, loss in enumerate(trainer.state.log_history["loss"]):
+                wandb.log({"train_loss": loss}, step=step)
+            wandb.finish()
+        accuracy = eval_results["eval_accuracy"]
         trainers.append(trainer)
         accuracies.append(accuracy)
-        training_time += train_result.metrics["train_runtime"]  # todo validate it's in seconds
+        training_time += train_result.metrics["train_runtime"]
     return np.mean(accuracies), np.std(accuracies), trainers[np.argmax(accuracies)], tokenizer, \
         training_time
 
@@ -171,7 +161,6 @@ def main():
     dataset = load_dataset(DATASET)
 
     wandb.login()
-    wandb.init(project=PROJECT_NAME, name=LOG_NAME)
 
     accumulated_training_time, most_accurate_model, tokenizer, res = train(
         dataset, MODEL_NAMES, number_of_seeds, number_of_training_samples,
