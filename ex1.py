@@ -149,7 +149,7 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
         tokenized_sentence = tokenizer(sentence, truncation=True, return_tensors='pt')
         tokenized_sentence = {key: value.to(device) for key, value in tokenized_sentence.items()}
         before_predict_time = time()
-        prediction = np.argmax(trainer.model(**tokenized_sentence).logits)
+        prediction = trainer.model(**tokenized_sentence).logits.argmax(dim=1).item()
         prediction_time += (time() - before_predict_time)
         output += f"{sentence}###{prediction}\n"
     with open(predictions_output_path, "w") as f:
