@@ -8,6 +8,7 @@ from transformers import (
     set_seed, AutoModelForSequenceClassification, TrainingArguments, Trainer, EvalPrediction,
     AutoTokenizer, AutoConfig)
 import wandb
+import torch
 
 
 PROJECT_NAME = "ANLP-ex1"
@@ -143,8 +144,10 @@ def predict(dataset, trainer, tokenizer, number_of_prediction_samples,
         test_dataset = test_dataset.select(range(number_of_prediction_samples))
     output = ""
     prediction_time = 0
+    device = torch.device("cuda:0")
     for sentence in test_dataset["sentence"]:
-        tokenized_sentence = tokenizer(sentence, truncation=True, return_tensors='pt')
+        tokenized_sentence = tokenizer(sentence.cuda, truncation=True, return_tensors='pt')
+        tokenized_sentence = {key: value.to(device) for key, value in tokenized_sentence.items()}
         before_predict_time = time()
         prediction = trainer.model(**tokenized_sentence)
         prediction_time += (time() - before_predict_time)
