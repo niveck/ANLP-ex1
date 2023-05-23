@@ -7,8 +7,8 @@ from datasets import load_dataset
 from transformers import (
     set_seed, AutoModelForSequenceClassification, Trainer, TrainingArguments,
     EvalPrediction, AutoTokenizer, AutoConfig)
-import wandb
 import torch
+import wandb
 
 
 PROJECT_NAME = "ANLP-ex1"
@@ -92,8 +92,9 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
     for seed in range(number_of_seeds):
         set_seed(seed)
         model_dir_name = model_name.replace("/", "-")+f"-{seed}"
-        args = TrainingArguments(output_dir=model_dir_name, report_to="wandb")
-        wandb.init(project=PROJECT_NAME, name=model_dir_name)
+        # args = TrainingArguments(output_dir=model_dir_name, report_to="wandb")
+        args = TrainingArguments(output_dir=model_dir_name)
+        # wandb.init(project=PROJECT_NAME, name=model_dir_name)
         preprocessed_data = dataset.map(preprocess, batched=True)
         train_dataset = preprocessed_data["train"]
         if number_of_training_samples > 0:
@@ -106,7 +107,7 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
                           tokenizer=tokenizer)
         train_result = trainer.train()
         eval_results = trainer.evaluate()
-        wandb.finish()
+        # wandb.finish()
         accuracy = eval_results["eval_accuracy"]
         trainers.append(trainer)
         accuracies.append(accuracy)
@@ -158,7 +159,7 @@ def main():
 
     dataset = load_dataset(DATASET)
 
-    wandb.login()
+    # wandb.login()
 
     accumulated_training_time, most_accurate_model, tokenizer, res = train(
         dataset, MODEL_NAMES, number_of_seeds, number_of_training_samples,
