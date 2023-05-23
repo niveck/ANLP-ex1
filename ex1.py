@@ -14,8 +14,8 @@ import wandb
 PROJECT_NAME = "ANLP-ex1"
 DATASET = "sst2"
 MODEL_NAMES = ["bert-base-uncased", "roberta-base", "google/electra-base-generator"]
-RESULTS_PATH = "results_of_night_run/res.txt"
-PREDICTIONS_OUTPUT_PATH = "results_of_night_run/predictions.txt"
+RESULTS_PATH = "results/res.txt"
+PREDICTIONS_OUTPUT_PATH = "results/predictions.txt"
 
 
 def create_metric(metric):
@@ -91,7 +91,7 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
     training_time = 0
     for seed in range(number_of_seeds):
         set_seed(seed)
-        model_dir_name = model_name.replace("/", "-")+f"-{seed}"
+        model_dir_name = model_name.replace("/", "-")+f"-{seed}-checkouts"
         # args = TrainingArguments(output_dir=model_dir_name, report_to="wandb")
         args = TrainingArguments(output_dir=model_dir_name)
         # wandb.init(project=PROJECT_NAME, name=model_dir_name)
