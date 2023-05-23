@@ -5,7 +5,7 @@ from prepare import prepare
 import evaluate
 from datasets import load_dataset
 from transformers import (
-    set_seed, AutoModelForSequenceClassification, Trainer,
+    set_seed, AutoModelForSequenceClassification, Trainer, TrainingArguments,
     EvalPrediction, AutoTokenizer, AutoConfig)
 import wandb
 import torch
@@ -91,8 +91,9 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
     training_time = 0
     for seed in range(number_of_seeds):
         set_seed(seed)
-        if seed == 0:
-            wandb.init(project=PROJECT_NAME, name=model_name.replace("/", "-"))
+        model_dir_name = model_name.replace("/", "-")+f"-{seed}"
+        args = TrainingArguments(output_dir=model_dir_name, report_to="wandb")
+        wandb.init(project=PROJECT_NAME, name=model_dir_name)
         preprocessed_data = dataset.map(preprocess, batched=True)
         train_dataset = preprocessed_data["train"]
         if number_of_training_samples > 0:
@@ -100,13 +101,12 @@ def finetune_sentiment_analysis_model(dataset, model_name, number_of_seeds,
         eval_dataset = preprocessed_data["validation"]
         if number_of_validation_samples > 0:
             eval_dataset = eval_dataset.select(range(number_of_validation_samples))
-        trainer = Trainer(model=model, train_dataset=train_dataset,
+        trainer = Trainer(model=model, train_dataset=train_dataset, args=args,
                           eval_dataset=eval_dataset, compute_metrics=compute_metrics,
                           tokenizer=tokenizer)
         train_result = trainer.train()
         eval_results = trainer.evaluate()
-        if seed == 0:
-            wandb.finish()
+        wandb.finish()
         accuracy = eval_results["eval_accuracy"]
         trainers.append(trainer)
         accuracies.append(accuracy)
