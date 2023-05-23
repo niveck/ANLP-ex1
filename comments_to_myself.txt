@@ -1,5 +1,0 @@
-recommanded table to use for the dynamic padding:
-https://huggingface.co/docs/transformers/pad_truncation
-
-
-# todo - what should I do with the need to always manually `pip install --upgrade accelerate`

@@ -1,0 +1,27 @@
+>>> from prepare import prepare
+>>> prepare()
+>>> from datasets import load_dataset
+>>> squad = load_dataset('squad')
+Found cached dataset squad (/cs/snapless/gabis/uriber/playground/hf_cache/datasets/squad/plain_text/1.0.0/d6ec3ceb99ca480ce37cdd35555d6cb2511d223b9150cce08a837ef62ffea453)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 289.96it/s]
+>>> dict_keys(['train', 'validation'])
+dict_keys(['train', 'test', 'unsupervised'])
+>>> train_set = squad['train']
+>>> len(train_set)
+87599
+>>> train_set[0]
+{'id': '5733be284776f41900661182', 'title': 'University_of_Notre_Dame', 'context': 'Architecturally, the school has a Catholic character. Atop the Main Building\'s gold dome is a golden statue of the Virgin Mary. Immediately in front of the Main Building and facing it, is a copper statue of Christ with arms upraised with the legend "Venite Ad Me Omnes". Next to the Main Building is the Basilica of the Sacred Heart. Immediately behind the basilica is the Grotto, a Marian place of prayer and reflection. It is a replica of the grotto at Lourdes, France where the Virgin Mary reputedly appeared to Saint Bernadette Soubirous in 1858. At the end of the main drive (and in a direct line that connects through 3 statues and the Gold Dome), is a simple, modern stone statue of Mary.', 'question': 'To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?', 'answers': {'text': ['Saint Bernadette Soubirous'], 'answer_start': [515]}}
+>>> train_set[0].keys()
+dict_keys(['id', 'title', 'context', 'question', 'answers'])
+>>> len([x for x in train_set if len(x['answers']['text']) != 1])
+0
+>>> answer_len = [(i, len(train_set[i]['answers']['text'][0].split())) for i in range(len(train_set))]
+>>> answer_len.sort(key=lambda x:x[1])
+>>> answer_len[0]
+(6, 1)
+>>> train_set[6]
+{'id': '5733bf84d058e614000b61bf', 'title': 'University_of_Notre_Dame', 'context': "As at most other universities, Notre Dame's students run a number of news media outlets. The nine student-run outlets include three newspapers, both a radio and television station, and several magazines and journals. Begun as a one-page journal in September 1876, the Scholastic magazine is issued twice monthly and claims to be the oldest continuous collegiate publication in the United States. The other magazine, The Juggler, is released twice a year and focuses on student literature and artwork. The Dome yearbook is published annually. The newspapers have varying publication interests, with The Observer published daily and mainly reporting university and other news, and staffed by students from both Notre Dame and Saint Mary's College. Unlike Scholastic and The Dome, The Observer is an independent publication and does not have a faculty advisor or any editorial oversight from the University. In 1987, when some students believed that The Observer began to show a conservative bias, a liberal newspaper, Common Sense was published. Likewise, in 2003, when other students believed that the paper showed a liberal bias, the conservative paper Irish Rover went into production. Neither paper is published as often as The Observer; however, all three are distributed to all students. Finally, in Spring 2008 an undergraduate journal for political science research, Beyond Politics, made its debut.", 'question': "How often is Notre Dame's the Juggler published?", 'answers': {'text': ['twice'], 'answer_start': [441]}}
+>>> answer_len[-1]
+(3583, 43)
+>>> train_set[3583]
+{'id': '56cec3e8aab44d1400b88a02', 'title': '2008_Sichuan_earthquake', 'context': 'An article in Science suggested that the construction and filling of the Zipingpu Dam may have triggered the earthquake. The chief engineer of the Sichuan Geology and Mineral Bureau said that the sudden shift of a huge quantity of water into the region could have relaxed the tension between the two sides of the fault, allowing them to move apart, and could have increased the direct pressure on it, causing a violent rupture. The effect was "25 times more" than a year\'s worth of natural stress from tectonic movement. The government had disregarded warnings about so many large-scale dam projects in a seismically active area. Researchers have been denied access to seismological and geological data to examine the cause of the quake further.', 'question': 'What was concluded about the construction?', 'answers': {'text': ['that the sudden shift of a huge quantity of water into the region could have relaxed the tension between the two sides of the fault, allowing them to move apart, and could have increased the direct pressure on it, causing a violent rupture'], 'answer_start': [187]}}

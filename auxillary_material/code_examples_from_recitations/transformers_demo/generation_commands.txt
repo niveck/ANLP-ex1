@@ -1,0 +1,33 @@
+>>> from prepare import prepare
+>>> prepare()
+>>> import torch
+>>> from transformers import GPT2Tokenizer, AutoModelForCausalLM
+>>> tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+>>> model = AutoModelForCausalLM.from_pretrained('gpt2')
+>>> tokenized_input = tokenizer('Yesterday I went to', return_tensors="pt")
+>>> tokenized_input.input_ids.shape
+torch.Size([1, 4])
+>>> ' '.join([tokenizer.decode(input_id) for input_id in list(tokenized_input.input_ids[0])])
+'Yesterday  I  went  to'
+>>> res = model(**tokenized_input)
+>>> res.keys()
+odict_keys(['logits', 'past_key_values'])
+>>> res.logits.shape
+torch.Size([1, 4, 50257])
+>>> [tokenizer.decode(torch.argmax(res.logits[0, i, :])) for i in range(4)]
+[',', ' was', ' to', ' the']
+>>> res = model.generate(**tokenized_input, max_new_tokens=10)
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+>>> res.shape
+torch.Size([1, 14])
+>>> res
+tensor([[28065,   314,  1816,   284,   262,  3650,   290,  5839,   257,   649,
+           530,    13,   314,   373]])
+>>> tokenizer.decode(res[0])
+'Yesterday I went to the store and bought a new one. I was'
+>>> res = model.generate(**tokenized_input, max_new_tokens=10, num_beams=4, num_return_sequences=4)
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+>>> res.shape
+torch.Size([4, 14])
+>>> [tokenizer.decode(res[i]) for i in range(4)]
+['Yesterday I went to the store and bought a new pair of shoes.', 'Yesterday I went to the store and bought a new one. It was', "Yesterday I went to the store and bought a new one. It's", 'Yesterday I went to the store and bought a new one. I was']

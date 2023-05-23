@@ -1,0 +1,57 @@
+>>> from prepare import prepare
+>>> prepare()
+>>> import torch
+>>> from transformers import AutoTokenizer, AutoModel
+>>> tokenizer = AutoTokenizer('bert-base-uncased')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: __init__() takes 1 positional argument but 2 were given
+>>> tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+Downloading (…)/main/tokenizer.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████| 466k/466k [00:00<00:00, 1.86MB/s]
+>>> model = AutoModel.from_pretrained('bert-base-uncased')
+Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertModel: ['cls.predictions.transform.dense.weight', 'cls.predictions.decoder.weight', 'cls.predictions.transform.dense.bias', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.LayerNorm.bias', 'cls.seq_relationship.weight', 'cls.seq_relationship.bias']
+- This IS expected if you are initializing BertModel from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertModel from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+>>> tokenizer('Model improvement is incremental')
+{'input_ids': [101, 2944, 7620, 2003, 4297, 28578, 21050, 102], 'token_type_ids': [0, 0, 0, 0, 0, 0, 0, 0], 'attention_mask': [1, 1, 1, 1, 1, 1, 1, 1]}
+>>> tokenizer('Model improvement is incremental', return_tensors='pt')
+{'input_ids': tensor([[  101,  2944,  7620,  2003,  4297, 28578, 21050,   102]]), 'token_type_ids': tensor([[0, 0, 0, 0, 0, 0, 0, 0]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1]])}
+>>> my_input_ids = tokenizer('Model improvement is incremental').input_ids
+>>> ' '.join([tokenizer.decode(input_id) for input_id in my_input_ids])
+'[CLS] model improvement is inc ##rem ##ental [SEP]'
+>>> tokenized_input = tokenizer('Model improvement is incremental', 'Datasets are too')
+>>> tokenized_input
+{'input_ids': [101, 2944, 7620, 2003, 4297, 28578, 21050, 102, 2951, 13462, 2015, 2024, 2205, 102], 'token_type_ids': [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], 'attention_mask': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+>>> tokenized_input = tokenizer(['Model improvement is incremental', 'Datasets are too'], padding=True)
+>>> tokenized_input
+{'input_ids': [[101, 2944, 7620, 2003, 4297, 28578, 21050, 102], [101, 2951, 13462, 2015, 2024, 2205, 102, 0]], 'token_type_ids': [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]], 'attention_mask': [[1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 0]]}
+>>> tokenized_input = tokenizer('Model improvement is incremental', return_tensors='pt')
+>>> tokenized_input.input_ids.shape
+torch.Size([1, 8])
+>>> res = model(**tokenized_input)
+>>> res.keys()
+odict_keys(['last_hidden_state', 'pooler_output'])
+>>> res.last_hidden_state.shape
+torch.Size([1, 8, 768])
+>>> from transformers import AutoModelForMaskedLM
+>> model = AutoModelForMaskedLM.from_pretrained('bert-base-uncased')
+Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertForMaskedLM: ['cls.seq_relationship.weight', 'cls.seq_relationship.bias']
+- This IS expected if you are initializing BertForMaskedLM from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForMaskedLM from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+>>> tokenized_input = tokenizer('Paris is the [MASK] of France', return_tensors='pt')
+>>> tokenized_input.input_ids
+tensor([[ 101, 3000, 2003, 1996,  103, 1997, 2605,  102]])
+>>> ' '.join([tokenizer.decode(input_id) for input_id in list(tokenized_input.input_ids[0])])
+'[CLS] paris is the [MASK] of france [SEP]'
+>>> tokenizer.decode(103)
+'[MASK]'
+>>> res = model(**tokenized_input)
+>>> res.keys()
+odict_keys(['logits'])
+>>> res['logits'].shape
+torch.Size([1, 8, 30522])
+>>> masked_token_logits = res['logits'][0, 4, :]
+>>> torch.argmax(masked_token_logits)
+tensor(3007)
+>>> tokenizer.decode(3007)
+'capital'
