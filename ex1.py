@@ -14,8 +14,8 @@ import wandb
 PROJECT_NAME = "ANLP-ex1"
 DATASET = "sst2"
 MODEL_NAMES = ["bert-base-uncased", "roberta-base", "google/electra-base-generator"]
-RESULTS_PATH = "results/res.txt"
-PREDICTIONS_OUTPUT_PATH = "results/predictions.txt"
+RESULTS_PATH = "res.txt"
+PREDICTIONS_OUTPUT_PATH = "predictions.txt"
 
 
 def create_metric(metric):
