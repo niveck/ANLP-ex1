@@ -1,0 +1,6 @@
+bert-base-uncased,0.9151376146788991 +- 0.0
+roberta-base,0.8864678899082569 +- 0.0
+google/electra-base-generator,0.8979357798165137 +- 0.0
+----
+train time,6952.7503
+predict time,25.979907512664795
